@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resort Paradise Operations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #0b152a;
+      --muted: #7b86a0;
+      --card: #0f1627;
+      --card-alt: #0b1221;
+      --border: #1f2a44;
+      --accent: #4ac4ff;
+      --accent-2: #a8ff70;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 26px 24px 32px;
+      background: radial-gradient(circle at 18% 22%, rgba(74,196,255,0.08), rgba(168,255,112,0.04)), #060a14;
+      color: #e8edf7;
+      font-family: "Space Grotesk", system-ui, -apple-system, sans-serif;
+      letter-spacing: 0.01em;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    h1 {
+      margin: 0 0 4px;
+      font-size: 28px;
+      letter-spacing: -0.02em;
+      color: #f5f9ff;
+    }
+    .muted { color: var(--muted); font-size: 13px; margin: 0; }
+    .chip {
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(74,196,255,0.12);
+      border: 1px solid rgba(74,196,255,0.25);
+      color: #d9f4ff;
+      font-weight: 600;
+    }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 960px) { .grid { grid-template-columns: 1fr; } }
+    .card {
+      background: linear-gradient(140deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; background: transparent; }
+    th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: left; font-size: 14px; }
+    th {
+      background: rgba(255,255,255,0.02);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 11px;
+      color: #9fb1c8;
+    }
+    tr:hover td { background: rgba(74,196,255,0.03); }
+    .pill { padding: 5px 10px; border-radius: 999px; font-size: 12px; display: inline-block; border: 1px solid var(--border); }
+    .pending { background: rgba(255,194,102,0.12); color: #ffdca1; border-color: rgba(255,194,102,0.25); }
+    .inprogress { background: rgba(74,196,255,0.12); color: #d9f4ff; border-color: rgba(74,196,255,0.25); }
+    .completed { background: rgba(168,255,112,0.12); color: #e7ffd1; border-color: rgba(168,255,112,0.25); }
+    .section-title { margin: 16px; font-size: 17px; color: #f2f6ff; letter-spacing: -0.01em; }
+    .summary { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-bottom: 14px; }
+    @media (max-width: 720px) { .summary { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    .summary-card {
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #0c1324;
+    }
+    .summary-label { color: var(--muted); font-size: 12px; margin-bottom: 4px; }
+    .summary-value { font-size: 18px; font-weight: 700; color: #f5f9ff; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Resort Paradise Operations</h1>
+      <p class="muted">Live view of restaurant and room service requests.</p>
+    </div>
+    <div class="chip">Live sync · Premium concierge</div>
+  </header>
+
+  <div class="summary" id="summary-cards">
+    <div class="summary-card">
+      <div class="summary-label">Open restaurant orders</div>
+      <div class="summary-value" id="orders-count">0</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">Room-service requests</div>
+      <div class="summary-value" id="room-count">0</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">Total value (open)</div>
+      <div class="summary-value" id="orders-total">$0.00</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="section-title">Restaurant Orders</div>
+      <table id="orders-table">
+        <thead>
+          <tr><th>ID</th><th>Room</th><th>Items</th><th>Total</th><th>Placed</th><th>Status</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="section-title">Room Service</div>
+      <table id="room-table">
+        <thead>
+          <tr><th>ID</th><th>Room</th><th>Request</th><th>Placed</th><th>Status</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    async function loadData() {
+      try {
+        const res = await fetch("/api/dashboard");
+        const data = await res.json();
+        renderOrders(data.restaurant_orders || []);
+        renderRoom(data.room_service_requests || []);
+        updateSummary(data.restaurant_orders || [], data.room_service_requests || []);
+      } catch (err) {
+        console.error("Dashboard load failed", err);
+      }
+    }
+
+    function renderOrders(orders) {
+      const tbody = document.querySelector("#orders-table tbody");
+      tbody.innerHTML = orders.map(o => `
+        <tr>
+          <td>${o.id}</td>
+          <td>${o.room_number}</td>
+          <td>${o.items.map(i => `${i.quantity}x ${i.name}`).join(", ")}</td>
+          <td>₹${o.total_amount.toFixed(2)}</td>
+          <td>${formatDate(o.created_at)}</td>
+          <td>${pill(o.status)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderRoom(requests) {
+      const tbody = document.querySelector("#room-table tbody");
+      tbody.innerHTML = requests.map(r => `
+        <tr>
+          <td>${r.id}</td>
+          <td>${r.room_number}</td>
+          <td>${r.request_type}</td>
+          <td>${formatDate(r.created_at)}</td>
+          <td>${pill(r.status)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function pill(status) {
+      const cls = status ? status.toLowerCase().replace(/\\s/g, "") : "pending";
+      return `<span class="pill ${cls}">${status}</span>`;
+    }
+
+    function formatDate(value) {
+      if (!value) return "";
+      const dt = new Date(value);
+      if (Number.isNaN(dt.getTime())) return "";
+      return dt.toLocaleString();
+    }
+
+    function updateSummary(orders, roomReqs) {
+      const ordersCount = orders.length;
+      const roomCount = roomReqs.length;
+      const totalValue = orders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
+      document.getElementById("orders-count").textContent = ordersCount;
+      document.getElementById("room-count").textContent = roomCount;
+      document.getElementById("orders-total").textContent = `$${totalValue.toFixed(2)}`;
+    }
+
+    loadData();
+    setInterval(loadData, 6000);
+  </script>
+</body>
+</html>
