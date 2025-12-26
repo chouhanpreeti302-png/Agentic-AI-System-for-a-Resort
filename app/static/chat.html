@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resort Paradise Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #0b152a;
+      --muted: #5a6478;
+      --surface: #0f1729;
+      --panel: #111a2f;
+      --card: #111b2f;
+      --card-alt: #0c1324;
+      --accent: #4ac4ff;
+      --accent-2: #a8ff70;
+      --border: #1f2a44;
+      --glow: 0 25px 60px rgba(74, 196, 255, 0.2);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 20% 20%, rgba(74,196,255,0.08), rgba(168,255,112,0.04)), #060a14;
+      font-family: "Space Grotesk", "Inter", system-ui, -apple-system, sans-serif;
+      color: #e8edf7;
+      min-height: 100vh;
+      letter-spacing: 0.01em;
+    }
+    header {
+      padding: 22px 28px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(74,196,255,0.35), rgba(168,255,112,0.25));
+      border: 1px solid rgba(168,255,112,0.2);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #e8f8ff;
+      font-weight: 700;
+    }
+    .pill {
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: rgba(74,196,255,0.12);
+      color: #d9f4ff;
+      border: 1px solid rgba(74,196,255,0.25);
+      box-shadow: var(--glow);
+    }
+    main {
+      padding: 0 24px 32px;
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+      gap: 18px;
+      max-width: 1320px;
+      margin: 0 auto 28px;
+    }
+    @media (max-width: 1024px) {
+      main { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: linear-gradient(145deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    }
+    .chat-card { display: flex; flex-direction: column; min-height: 70vh; }
+    .section-title {
+      margin: 0;
+      padding: 20px 22px 2px;
+      font-size: 18px;
+      letter-spacing: -0.01em;
+      color: #f2f6ff;
+    }
+    .subtext {
+      margin: 4px 22px 14px;
+      color: #9aa5ba;
+      font-size: 13px;
+    }
+    .messages {
+      flex: 1;
+      padding: 14px 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .bubble {
+      max-width: 82%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid #1f2a44;
+      background: #0d1425;
+      line-height: 1.5;
+      position: relative;
+      color: #e8edf7;
+    }
+    .bubble.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, rgba(74,196,255,0.35), rgba(168,255,112,0.25));
+      color: #0b152a;
+      border-color: transparent;
+      box-shadow: 0 10px 28px rgba(74, 196, 255, 0.25);
+      font-weight: 600;
+    }
+    .bubble.agent {
+      align-self: flex-start;
+      background: #0b1222;
+    }
+    .meta {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+      font-size: 12px;
+      color: #9aa5ba;
+      flex-wrap: wrap;
+    }
+    .tag {
+      padding: 4px 9px;
+      border-radius: 10px;
+      font-size: 11px;
+      border: 1px solid #1f2a44;
+      background: #0f1627;
+      color: #cfd6e7;
+    }
+    .tag.room { background: rgba(168,255,112,0.12); border-color: rgba(168,255,112,0.25); color: #dfffd1; }
+    .tag.dept { background: rgba(74,196,255,0.12); border-color: rgba(74,196,255,0.25); color: #d9f4ff; }
+    .tag.status { background: rgba(255,194,102,0.12); border-color: rgba(255,194,102,0.25); color: #ffdca1; }
+    form {
+      border-top: 1px solid var(--border);
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr 140px 120px;
+      gap: 10px;
+      background: #0b1221;
+      border-radius: 0 0 18px 18px;
+    }
+    @media (max-width: 760px) {
+      form { grid-template-columns: 1fr 1fr; }
+      .room-input { grid-column: 1 / -1; }
+    }
+    input, button, textarea { font: inherit; }
+    textarea {
+      resize: none;
+      min-height: 52px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #0d1425;
+      outline: none;
+      color: #e8edf7;
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.12s ease;
+    }
+    textarea:focus, input:focus {
+      border-color: rgba(74,196,255,0.8);
+      box-shadow: 0 0 0 3px rgba(74,196,255,0.18);
+      transform: translateY(-1px);
+    }
+    input.room-input {
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #0d1425;
+      color: #e8edf7;
+    }
+    button {
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #4ac4ff, #8bff9d);
+      color: #0b152a;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 14px 30px rgba(74,196,255,0.28);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    button:active { transform: translateY(1px); box-shadow: 0 8px 18px rgba(74,196,255,0.25); }
+    button:disabled { opacity: 0.7; cursor: not-allowed; }
+    .side-card { padding: 18px; background: linear-gradient(145deg, #0f1729, #0c1324); }
+    .side-card h3 { margin: 8px 0 4px; font-size: 15px; color: #f1f5ff; letter-spacing: -0.01em; }
+    .muted { color: #9aa5ba; font-size: 13px; }
+    .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    @media (max-width: 520px) { .menu-grid { grid-template-columns: 1fr; } }
+    .menu-item {
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #0d1526;
+      border: 1px solid #1f2a44;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: #dbe5f7;
+    }
+    .order-snippet {
+      margin-top: 10px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px dashed rgba(74,196,255,0.35);
+      background: rgba(74,196,255,0.08);
+      font-size: 13px;
+      color: #dbe5f7;
+    }
+    .hero {
+      padding: 12px 24px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .hero-title {
+      font-size: 28px;
+      margin: 0 0 6px;
+      color: #f7fbff;
+      letter-spacing: -0.02em;
+    }
+    .hero-sub {
+      margin: 0;
+      color: #9aa5ba;
+      font-size: 14px;
+    }
+    .hero-badge {
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(168,255,112,0.35);
+      background: rgba(168,255,112,0.08);
+      color: #dfffd1;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand"><span class="brand-badge">R</span> Resort Paradise</div>
+    <div class="pill">Live agent interface</div>
+  </header>
+
+  <div class="hero">
+    <div>
+      <h1 class="hero-title">Premium guest concierge</h1>
+      <p class="hero-sub">Order food, schedule housekeeping, and request amenities in one natural conversation.</p>
+    </div>
+    <div class="hero-badge">⚡ Instant routing · Human-grade replies</div>
+  </div>
+
+  <main>
+    <section class="card chat-card">
+      <h2 class="section-title">Chat with the resort</h2>
+      <p class="subtext">Ask about food, housekeeping, or amenities. Mention your room number to place requests.</p>
+
+      <div id="messages" class="messages"></div>
+
+      <form id="chat-form">
+        <textarea id="message" placeholder="Type your request (e.g., “Send two coffees and extra towels to room 101”)"></textarea>
+        <input id="room" class="room-input" placeholder="Room #" />
+        <button id="send-btn" type="submit">Send</button>
+      </form>
+    </section>
+
+    <aside class="card side-card">
+      <h3>Quick tips</h3>
+      <p class="muted">Mention what you need and your room. The agent routes to restaurant or room service automatically.</p>
+      <div class="order-snippet" id="last-order" style="display:none;"></div>
+      <div class="order-snippet" id="last-room" style="display:none;"></div>
+      <h3>Menu highlights</h3>
+      <div id="menu-grid" class="menu-grid"></div>
+    </aside>
+  </main>
+
+  <script>
+    const messagesEl = document.getElementById("messages");
+    const form = document.getElementById("chat-form");
+    const messageInput = document.getElementById("message");
+    const roomInput = document.getElementById("room");
+    const sendBtn = document.getElementById("send-btn");
+    const menuGrid = document.getElementById("menu-grid");
+    const lastOrder = document.getElementById("last-order");
+    const lastRoom = document.getElementById("last-room");
+
+    const conversationId = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
+
+    function addBubble(role, text, meta = {}) {
+      const bubble = document.createElement("div");
+      bubble.className = `bubble ${role}`;
+      bubble.innerText = text;
+
+      if (meta.department || meta.room || meta.status) {
+        const metaDiv = document.createElement("div");
+        metaDiv.className = "meta";
+        if (meta.department) {
+          const t = document.createElement("span");
+          t.className = "tag dept";
+          t.innerText = meta.department;
+          metaDiv.appendChild(t);
+        }
+        if (meta.room) {
+          const t = document.createElement("span");
+          t.className = "tag room";
+          t.innerText = `Room ${meta.room}`;
+          metaDiv.appendChild(t);
+        }
+        if (meta.status) {
+          const t = document.createElement("span");
+          t.className = "tag status";
+          t.innerText = meta.status;
+          metaDiv.appendChild(t);
+        }
+        bubble.appendChild(metaDiv);
+      }
+
+      messagesEl.appendChild(bubble);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    async function sendMessage(evt) {
+      evt.preventDefault();
+      const text = messageInput.value.trim();
+      if (!text) return;
+      let room = roomInput.value.trim() || null;
+
+      // If room not provided explicitly, try to parse from the message (e.g., "room 104").
+      if (!room) {
+        const match = text.toLowerCase().match(/room\s*(\d{1,4})/);
+        if (match) {
+          room = match[1];
+          roomInput.value = room;
+        }
+      }
+
+      addBubble("user", text, { room });
+      messageInput.value = "";
+      sendBtn.disabled = true;
+
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text, room_number: room, conversation_id: conversationId }),
+        });
+        if (!res.ok) throw new Error(`Server returned ${res.status}`);
+        const data = await res.json();
+
+        addBubble("agent", data.reply, { department: data.department, room: room });
+        handleArtifacts(data);
+      } catch (err) {
+        addBubble("agent", "Sorry, I couldn't reach the service. Please try again.", { department: "system" });
+        console.error(err);
+      } finally {
+        sendBtn.disabled = false;
+        messageInput.focus();
+      }
+    }
+
+    function handleArtifacts(data) {
+      if (data.order) {
+        const items = data.order.items.map(i => `${i.quantity}x ${i.name}`).join(", ");
+        lastOrder.style.display = "block";
+        lastOrder.innerText = `Restaurant order #${data.order.id} · ${items} · Total ₹${data.order.total_amount.toFixed(2)} · ${data.order.status}`;
+      }
+      if (data.room_service_request) {
+        lastRoom.style.display = "block";
+        lastRoom.innerText = `Room service #${data.room_service_request.id} · ${data.room_service_request.request_type} · ${data.room_service_request.status}`;
+      }
+    }
+
+    async function loadMenu() {
+      try {
+        const res = await fetch("/api/menu");
+        if (!res.ok) return;
+        const data = await res.json();
+        const items = (data.menu || []).slice(0, 8);
+        menuGrid.innerHTML = items
+          .map(i => `<div class="menu-item"><span>${i.name}</span><span>₹${Number(i.price).toFixed(2)}</span></div>`)
+          .join("");
+      } catch (err) {
+        menuGrid.innerHTML = `<div class="muted">Menu unavailable.</div>`;
+      }
+    }
+
+    form.addEventListener("submit", sendMessage);
+    loadMenu();
+    addBubble("agent", "Welcome! Ask for food, towels, laundry, or cleaning. Include your room number to place a request.", { department: "concierge" });
+  </script>
+</body>
+</html>
