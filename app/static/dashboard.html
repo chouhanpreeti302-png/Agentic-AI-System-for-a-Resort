@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Resort Paradise Operations</title>
+  <title>Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -48,7 +48,8 @@
       color: #d9f4ff;
       font-weight: 600;
     }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    @media (max-width: 1200px) { .grid { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 960px) { .grid { grid-template-columns: 1fr; } }
     .card {
       background: linear-gradient(140deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
@@ -82,6 +83,45 @@
     }
     .summary-label { color: var(--muted); font-size: 12px; margin-bottom: 4px; }
     .summary-value { font-size: 18px; font-weight: 700; color: #f5f9ff; }
+    .status-control {
+      margin-top: 6px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .status-select {
+      background: #0b1221;
+      border: 1px solid var(--border);
+      color: #dbe5f7;
+      border-radius: 8px;
+      padding: 4px 6px;
+      font-size: 12px;
+    }
+    .status-btn {
+      border: 1px solid rgba(74,196,255,0.35);
+      background: rgba(74,196,255,0.12);
+      color: #d9f4ff;
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .status-btn:hover {
+      background: rgba(74,196,255,0.2);
+    }
+    .icon-btn {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 10px;
+      color: #ffb4b4;
+      border: 1px solid transparent;
+    }
+    .icon-btn:hover {
+      border-color: rgba(255, 180, 180, 0.35);
+      background: rgba(255, 180, 180, 0.08);
+    }
   </style>
 </head>
 <body>
@@ -90,7 +130,7 @@
       <h1>Resort Paradise Operations</h1>
       <p class="muted">Live view of restaurant and room service requests.</p>
     </div>
-    <div class="chip">Live sync · Premium concierge</div>
+    <!-- <div class="chip">Live sync · Premium concierge</div> -->
   </header>
 
   <div class="summary" id="summary-cards">
@@ -103,8 +143,8 @@
       <div class="summary-value" id="room-count">0</div>
     </div>
     <div class="summary-card">
-      <div class="summary-label">Total value (open)</div>
-      <div class="summary-value" id="orders-total">$0.00</div>
+      <div class="summary-label">Total users</div>
+      <div class="summary-value" id="users-total">0</div>
     </div>
   </div>
 
@@ -127,6 +167,15 @@
         <tbody></tbody>
       </table>
     </div>
+    <div class="card">
+      <div class="section-title">Users</div>
+      <table id="users-table">
+        <thead>
+          <tr><th>ID</th><th>Name</th><th>Email</th><th>Room</th><th>Joined</th><th>Action</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
 
   <script>
@@ -136,7 +185,8 @@
         const data = await res.json();
         renderOrders(data.restaurant_orders || []);
         renderRoom(data.room_service_requests || []);
-        updateSummary(data.restaurant_orders || [], data.room_service_requests || []);
+        renderUsers(data.users || []);
+        updateSummary(data.restaurant_orders || [], data.room_service_requests || [], data.users || []);
       } catch (err) {
         console.error("Dashboard load failed", err);
       }
@@ -146,12 +196,20 @@
       const tbody = document.querySelector("#orders-table tbody");
       tbody.innerHTML = orders.map(o => `
         <tr>
-          <td>${o.id}</td>
+          <td>${o.display_id || o.id}</td>
           <td>${o.room_number}</td>
           <td>${o.items.map(i => `${i.quantity}x ${i.name}`).join(", ")}</td>
           <td>₹${o.total_amount.toFixed(2)}</td>
           <td>${formatDate(o.created_at)}</td>
-          <td>${pill(o.status)}</td>
+          <td>
+            ${pill(o.status)}
+            <div class="status-control">
+              <select class="status-select" id="order-status-${o.id}">
+                ${statusOptions(o.status)}
+              </select>
+              <button class="status-btn" onclick="updateOrderStatus(${o.id})">Update</button>
+            </div>
+          </td>
         </tr>
       `).join("");
     }
@@ -160,11 +218,42 @@
       const tbody = document.querySelector("#room-table tbody");
       tbody.innerHTML = requests.map(r => `
         <tr>
-          <td>${r.id}</td>
+          <td>${r.display_id || r.id}</td>
           <td>${r.room_number}</td>
           <td>${r.request_type}</td>
           <td>${formatDate(r.created_at)}</td>
-          <td>${pill(r.status)}</td>
+          <td>
+            ${pill(r.status)}
+            <div class="status-control">
+              <select class="status-select" id="room-status-${r.id}">
+                ${statusOptions(r.status)}
+              </select>
+              <button class="status-btn" onclick="updateRoomStatus(${r.id})">Update</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function renderUsers(users) {
+      const tbody = document.querySelector("#users-table tbody");
+      tbody.innerHTML = users.map(u => `
+        <tr>
+          <td>${u.id}</td>
+          <td>${u.full_name}</td>
+          <td>${u.email}</td>
+          <td>${u.room_number || "NA"}</td>
+          <td>${formatDate(u.created_at)}</td>
+          <td>
+            <button class="icon-btn" title="Delete user" onclick="deleteUser('${u.id}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 7h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                <path d="M9 7v11m6-11v11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                <path d="M7 7l1-3h8l1 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                <path d="M6 7l1 13h10l1-13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </td>
         </tr>
       `).join("");
     }
@@ -174,6 +263,13 @@
       return `<span class="pill ${cls}">${status}</span>`;
     }
 
+    function statusOptions(current) {
+      const statuses = ["Pending", "In Progress", "Completed"];
+      return statuses
+        .map(s => `<option value="${s}" ${s === current ? "selected" : ""}>${s}</option>`)
+        .join("");
+    }
+
     function formatDate(value) {
       if (!value) return "";
       const dt = new Date(value);
@@ -181,17 +277,65 @@
       return dt.toLocaleString();
     }
 
-    function updateSummary(orders, roomReqs) {
+    function updateSummary(orders, roomReqs, users) {
       const ordersCount = orders.length;
       const roomCount = roomReqs.length;
-      const totalValue = orders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
+      const usersCount = users.length || 0;
       document.getElementById("orders-count").textContent = ordersCount;
       document.getElementById("room-count").textContent = roomCount;
-      document.getElementById("orders-total").textContent = `$${totalValue.toFixed(2)}`;
+      document.getElementById("users-total").textContent = usersCount;
+    }
+
+    async function updateOrderStatus(orderId) {
+      const select = document.getElementById(`order-status-${orderId}`);
+      if (!select) return;
+      const status = select.value;
+      try {
+        const res = await fetch(`/api/orders/${orderId}/status`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status }),
+        });
+        if (!res.ok) throw new Error("Failed to update order.");
+        loadData();
+      } catch (err) {
+        console.error(err);
+        alert("Could not update order status.");
+      }
+    }
+
+    async function updateRoomStatus(requestId) {
+      const select = document.getElementById(`room-status-${requestId}`);
+      if (!select) return;
+      const status = select.value;
+      try {
+        const res = await fetch(`/api/room-service/${requestId}/status`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status }),
+        });
+        if (!res.ok) throw new Error("Failed to update request.");
+        loadData();
+      } catch (err) {
+        console.error(err);
+        alert("Could not update room service status.");
+      }
+    }
+
+    async function deleteUser(userId) {
+      if (!confirm("Delete this user?")) return;
+      try {
+        const res = await fetch(`/api/users/${userId}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Failed to delete user.");
+        loadData();
+      } catch (err) {
+        console.error(err);
+        alert("Could not delete user. Try again.");
+      }
     }
 
     loadData();
-    setInterval(loadData, 6000);
+    setInterval(loadData, 2000);
   </script>
 </body>
 </html>
