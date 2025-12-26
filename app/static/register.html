@@ -1,0 +1,750 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Register</title>
+  <!-- <meta name="description" content="Create your Resort Paradise account." /> -->
+
+  <style>
+    :root{
+      --bg: #0b1220;
+      --panel: rgba(255,255,255,0.06);
+      --panel-2: rgba(255,255,255,0.08);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.70);
+      --faint: rgba(255,255,255,0.55);
+      --border: rgba(255,255,255,0.12);
+      --shadow: 0 18px 60px rgba(0,0,0,0.55);
+
+      --brand: #7dd3fc;        /* sky */
+      --brand-2: #34d399;      /* emerald */
+      --accent: #fbbf24;       /* amber */
+      --danger: #fb7185;       /* rose */
+
+      --radius: 18px;
+      --radius-sm: 14px;
+      --max: 1160px;
+
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+
+    *{ box-sizing:border-box; }
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      font-family: var(--font);
+      color: var(--text);
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(125,211,252,0.20), transparent 65%),
+        radial-gradient(900px 600px at 90% 20%, rgba(52,211,153,0.14), transparent 60%),
+        radial-gradient(900px 700px at 60% 90%, rgba(251,191,36,0.10), transparent 65%),
+        linear-gradient(180deg, #070b14 0%, #0b1220 40%, #0b1220 100%);
+      overflow-x:hidden;
+    }
+
+    a{ color: inherit; text-decoration:none; }
+    .container{ width: min(var(--max), calc(100% - 40px)); margin:0 auto; }
+    .sr-only{
+      position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0;
+    }
+
+    /* Top Navbar */
+    .nav{
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(14px);
+      background: rgba(10,15,28,0.55);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 14px 0;
+      gap: 16px;
+    }
+    .brand{
+      display:flex; align-items:center; gap: 10px;
+      font-weight: 700; letter-spacing: 0.2px;
+    }
+    .logo{
+      width: 36px; height: 36px;
+      border-radius: 12px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25), transparent 40%),
+        linear-gradient(135deg, rgba(125,211,252,0.85), rgba(52,211,153,0.75));
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.16);
+    }
+    .nav-links{
+      display:flex; align-items:center; gap: 18px;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .nav-links a{
+      padding: 10px 10px;
+      border-radius: 12px;
+      transition: background .2s ease, color .2s ease, transform .2s ease;
+    }
+    .nav-links a:hover{
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+    .nav-cta{
+      display:flex; align-items:center; gap: 10px;
+    }
+
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      cursor:pointer;
+      transition: transform .15s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+      gap: 8px;
+      user-select:none;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.09);
+      border-color: rgba(255,255,255,0.18);
+    }
+    .btn-primary{
+      border: 1px solid rgba(125,211,252,0.35);
+      background: linear-gradient(135deg, rgba(125,211,252,0.20), rgba(52,211,153,0.16));
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    .btn-primary:hover{
+      border-color: rgba(125,211,252,0.55);
+      background: linear-gradient(135deg, rgba(125,211,252,0.26), rgba(52,211,153,0.20));
+    }
+    .btn-ghost{
+      background: transparent;
+    }
+
+    .hamburger{
+      display:none;
+      width: 42px; height: 42px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      cursor:pointer;
+    }
+    .hamburger span{
+      display:block; height:2px; width:18px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.85);
+      border-radius: 999px;
+      position:relative;
+    }
+    .hamburger span::before,
+    .hamburger span::after{
+      content:"";
+      position:absolute; left:0;
+      width:18px; height:2px;
+      background: rgba(255,255,255,0.85);
+      border-radius: 999px;
+    }
+    .hamburger span::before{ top:-6px; }
+    .hamburger span::after{ top:6px; }
+
+    /* Mobile menu */
+    .mobile-menu{
+      display:none;
+      border-top: 1px solid var(--border);
+      padding: 12px 0 16px;
+    }
+    .mobile-menu a{
+      display:block;
+      padding: 12px 10px;
+      border-radius: 14px;
+      color: var(--muted);
+      font-weight: 650;
+    }
+    .mobile-menu a:hover{
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+    }
+    .mobile-cta{
+      display:flex;
+      gap: 10px;
+      padding-top: 10px;
+    }
+
+    /* Page layout */
+    main{ padding: 34px 0 46px; }
+    .grid{
+      display:grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel{
+      border-radius: calc(var(--radius) + 6px);
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .panel-head{
+      padding: 16px 18px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+    }
+    .panel-title{
+      margin:0;
+      font-size: 18px;
+      letter-spacing: -0.2px;
+    }
+    .panel-sub{
+      margin: 6px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 13px;
+      max-width: 62ch;
+    }
+    .panel-body{ padding: 18px; }
+
+    /* Left info card */
+    .badge{
+      display:inline-flex; align-items:center; gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .badge-dot{
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, #fff, rgba(125,211,252,0.8));
+      box-shadow: 0 0 0 4px rgba(125,211,252,0.10);
+    }
+
+    .kpi{
+      margin-top: 14px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .kpi-card{
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+      padding: 12px;
+    }
+    .kpi-card .label{
+      color: rgba(255,255,255,0.65);
+      font-weight: 750;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    .kpi-card .value{
+      font-weight: 900;
+      letter-spacing: -0.2px;
+    }
+    .list{
+      margin-top: 14px;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+    .list-item{
+      display:flex;
+      gap: 10px;
+      align-items:flex-start;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+    }
+    .check{
+      width: 22px; height: 22px;
+      border-radius: 8px;
+      border: 1px solid rgba(52,211,153,0.22);
+      background: rgba(52,211,153,0.12);
+      display:flex; align-items:center; justify-content:center;
+      flex: 0 0 auto;
+      margin-top: 1px;
+    }
+    .list-item b{
+      display:block;
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
+    .list-item span{
+      display:block;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    /* Form */
+    form{ display:flex; flex-direction:column; gap: 12px; }
+    .row2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    label{
+      display:block;
+      font-size: 13px;
+      font-weight: 800;
+      color: rgba(255,255,255,0.82);
+      margin-bottom: 6px;
+    }
+    .field{
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      padding: 11px 12px;
+      color: rgba(255,255,255,0.92);
+      outline:none;
+      width: 100%;
+      font-size: 14px;
+      transition: border-color .2s ease, background .2s ease;
+    }
+    .field::placeholder{ color: rgba(255,255,255,0.42); font-weight: 650; }
+    .field:focus{
+      border-color: rgba(125,211,252,0.38);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .hint{
+      font-size: 12px;
+      color: rgba(255,255,255,0.55);
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    .error{
+      display:none;
+      margin-top: 6px;
+      color: rgba(255,255,255,0.92);
+      background: rgba(251,113,133,0.10);
+      border: 1px solid rgba(251,113,133,0.22);
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-weight: 750;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .error.show{ display:block; }
+
+    .success{
+      display:none;
+      margin-top: 10px;
+      background: rgba(52,211,153,0.10);
+      border: 1px solid rgba(52,211,153,0.22);
+      border-radius: 16px;
+      padding: 12px;
+      color: rgba(255,255,255,0.90);
+      font-weight: 800;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .success.show{ display:block; }
+
+    .divider{
+      height: 1px;
+      background: rgba(255,255,255,0.10);
+      margin: 8px 0;
+    }
+
+    .form-actions{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items:center;
+      margin-top: 2px;
+    }
+    .muted-link{
+      color: rgba(255,255,255,0.70);
+      font-weight: 800;
+      font-size: 13px;
+      padding: 8px 10px;
+      border-radius: 12px;
+    }
+    .muted-link:hover{
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.90);
+    }
+
+    /* Footer */
+    footer{
+      padding: 22px 0 34px;
+      border-top: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.15);
+    }
+    .tiny{
+      color: rgba(255,255,255,0.55);
+      font-size: 12px;
+      line-height: 1.6;
+      margin-top: 10px;
+    }
+    .footer-grid{
+      display:grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 14px;
+      align-items:start;
+    }
+    .footer-links{
+      display:flex; gap: 14px; flex-wrap: wrap;
+      justify-content:flex-end;
+      color: var(--muted);
+      font-weight: 650;
+      font-size: 13px;
+    }
+    .footer-links a{
+      padding: 8px 10px;
+      border-radius: 12px;
+    }
+    .footer-links a:hover{
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+    }
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px){
+      .nav-links, .nav-cta{ display:none; }
+      .hamburger{ display:inline-flex; align-items:center; justify-content:center; }
+      .mobile-menu{ display:none; }
+      .mobile-menu.open{ display:block; }
+
+      .row2{ grid-template-columns: 1fr; }
+      .footer-grid{ grid-template-columns: 1fr; }
+      .footer-links{ justify-content:flex-start; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- NAVBAR -->
+  <header class="nav">
+    <div class="container">
+      <div class="nav-inner">
+        <a class="brand" href="/" aria-label="Resort Paradise Home">
+          <div class="logo" aria-hidden="true"></div>
+          <div>
+            <div style="font-size:14px; line-height:1;">Resort Paradise</div>
+            <!-- <div style="font-size:12px; color: var(--muted); font-weight:650; margin-top:2px;">Guest ops automation</div> -->
+          </div>
+        </a>
+
+        <nav class="nav-links" aria-label="Primary">
+          <a href="/#features">Features</a>
+          <a href="/#how">How it Works</a>
+          <!-- <a href="/#pricing" title="Placeholder section">Pricing</a> -->
+          <a href="/dashboard">Dashboard</a>
+          <!-- <a href="/login">Login</a> -->
+          <!-- <a href="/register" style="color: rgba(255,255,255,0.92);">Register</a> -->
+        </nav>
+
+        <div class="nav-cta">
+          <a class="btn btn-ghost" href="/login">Login</a>
+          <a class="btn btn-primary" href="/register">Get Started</a>
+        </div>
+
+        <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <!-- Mobile menu -->
+      <div class="mobile-menu" id="mobileMenu" aria-label="Mobile">
+        <a href="/#features">Features</a>
+        <a href="/#how">How it Works</a>
+        <!-- <a href="/#pricing">Pricing</a> -->
+        <a href="/dashboard">Dashboard</a>
+        <!-- <a href="/login">Login</a> -->
+        <!-- <a href="/register">Register</a> -->
+        <div class="mobile-cta">
+          <a class="btn btn-ghost" href="/login" style="width:100%;">Login</a>
+          <a class="btn btn-primary" href="/register" style="width:100%;">Get Started</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="grid">
+        <!-- Left: value / reassurance -->
+        <section class="panel" aria-label="Register info">
+          <div class="panel-head">
+            <div class="badge">
+              <span class="badge-dot" aria-hidden="true"></span>
+              Create your account
+            </div>
+            <h1 class="panel-title" style="margin-top:12px;">A clean start for your resort operations</h1>
+            <p class="panel-sub">
+              Set up your account in minutes.
+            </p>
+          </div>
+          <div class="panel-body">
+            <div class="kpi" aria-hidden="true">
+              <div class="kpi-card">
+                <div class="label">Setup time</div>
+                <div class="value">~2 minutes</div>
+              </div>
+              <div class="kpi-card">
+                <div class="label">Guest experience</div>
+                <div class="value">Premium</div>
+              </div>
+            </div>
+
+            <div class="list">
+              <div class="list-item">
+                <div class="check" aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+                  </svg>
+                </div>
+                <div>
+                  <b>Intent routing built-in</b>
+                  <span>Guest requests can be routed to reception, restaurant, or room service workflows.</span>
+                </div>
+              </div>
+
+              <div class="list-item">
+                <div class="check" aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+                  </svg>
+                </div>
+                <div>
+                  <b>Trackable records</b>
+                  <span>Orders and service requests can be stored with status updates and dashboard visibility.</span>
+                </div>
+              </div>
+
+              <!-- <div class="list-item">
+                <div class="check" aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+                  </svg>
+                </div>
+                <div>
+                  <b>Role-based access</b>
+                  <span>Admin/Staff → Dashboard. Guest → Chat. (Mocked in this frontend-only page.)</span>
+                </div>
+              </div> -->
+            </div>
+
+            <!-- <div class="divider"></div> -->
+
+            <div style="color: rgba(255,255,255,0.60); font-size:12px; line-height:1.6;">
+              <!-- Note: This is a frontend-only prototype. Registration uses a mock API and stores a mock session in localStorage. -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Right: form -->
+        <section class="panel" aria-label="Register form">
+          <div class="panel-head">
+            <h2 class="panel-title">Register</h2>
+            <p class="panel-sub">
+              <!-- Required: Full Name, Email, Password, Confirm Password. Optional: Resort Name and Role. -->
+            </p>
+          </div>
+          <div class="panel-body">
+            <form id="registerForm" novalidate>
+              <div>
+                <label for="fullName">Full Name <span style="color:var(--accent);">*</span></label>
+                <input class="field" id="fullName" name="fullName" placeholder="e.g., Aanya Sharma" autocomplete="name" />
+              </div>
+
+              <div>
+                <label for="email">Email <span style="color:var(--accent);">*</span></label>
+                <input class="field" id="email" name="email" placeholder="e.g., aanya@resort.com" autocomplete="email" />
+              </div>
+
+              <div class="row2">
+                <div>
+                  <label for="password">Password <span style="color:var(--accent);">*</span></label>
+                  <input class="field" id="password" name="password" type="password" placeholder="Create a strong password" autocomplete="new-password" />
+                  <div class="hint">Use at least 8 characters.</div>
+                </div>
+                <div>
+                  <label for="confirmPassword">Confirm Password <span style="color:var(--accent);">*</span></label>
+                  <input class="field" id="confirmPassword" name="confirmPassword" type="password" placeholder="Re-enter password" autocomplete="new-password" />
+                </div>
+              </div>
+
+              <div class="row2">
+                <div>
+                  <!-- <label for="resortName">Resort Name <span style="color:rgba(255,255,255,0.55); font-weight:800;">(optional)</span></label>
+                  <input class="field" id="resortName" name="resortName" placeholder="e.g., Golden Sands Resort" /> -->
+                </div>
+                <div>
+                  <!-- <label for="role">Role <span style="color:rgba(255,255,255,0.55); font-weight:800;">(optional)</span></label>
+                  <select class="field" id="role" name="role">
+                    <option value="" selected>Select role (optional)</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Staff">Staff</option>
+                    <option value="Guest">Guest</option>
+                  </select>
+                  <div class="hint"></div> -->
+                </div>
+              </div>
+
+              <div id="errorBox" class="error" role="alert" aria-live="polite"></div>
+
+              <div class="form-actions">
+                <button class="btn btn-primary" type="submit" id="submitBtn">Create account</button>
+                <a class="muted-link" href="/login">Already have an account? Login</a>
+              </div>
+
+              <div id="successBox" class="success" aria-live="polite"></div>
+            </form>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="brand" style="gap:10px;">
+            <div class="logo" aria-hidden="true"></div>
+            <div>
+              <div style="font-weight:800;">Resort Paradise</div>
+              <div style="color: var(--muted); font-size: 13px; margin-top:4px;">AI-powered guest operations for modern hospitality.</div>
+            </div>
+          </div>
+          <div class="tiny">
+            © <span id="year"></span> Resort Paradise. All rights reserved.
+          </div>
+        </div>
+
+        <div class="footer-links" aria-label="Footer links">
+          <a href="/#top">About</a>
+          <a href="/#top">Contact</a>
+          <a href="/#top">Terms</a>
+          <a href="/#top">Privacy</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ---------------------------
+    // Mobile menu toggle
+    // ---------------------------
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    hamburger?.addEventListener('click', () => {
+      const isOpen = mobileMenu.classList.toggle('open');
+      hamburger.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    async function registerUser(payload) {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.detail || 'Registration failed. Please try again.');
+      }
+      return data;
+    }
+
+    // ---------------------------
+    // Form validation helpers
+    // ---------------------------
+    function isValidEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('errorBox');
+      el.textContent = msg;
+      el.classList.add('show');
+    }
+
+    function clearError() {
+      const el = document.getElementById('errorBox');
+      el.textContent = '';
+      el.classList.remove('show');
+    }
+
+    function showSuccess(msg) {
+      const el = document.getElementById('successBox');
+      el.innerHTML = msg;
+      el.classList.add('show');
+    }
+
+    function clearSuccess() {
+      const el = document.getElementById('successBox');
+      el.innerHTML = '';
+      el.classList.remove('show');
+    }
+
+    // ---------------------------
+    // Submit handler
+    // ---------------------------
+    const form = document.getElementById('registerForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearError();
+      clearSuccess();
+
+      const fullName = (document.getElementById('fullName').value || '').trim();
+      const email = (document.getElementById('email').value || '').trim();
+      const password = (document.getElementById('password').value || '');
+      const confirmPassword = (document.getElementById('confirmPassword').value || '');
+      // Client-side validation
+      if (!fullName) return showError('Full Name is required.');
+      if (!email) return showError('Email is required.');
+      if (!isValidEmail(email)) return showError('Please enter a valid email address.');
+      if (!password) return showError('Password is required.');
+      if (password.length < 8) return showError('Password must be at least 8 characters.');
+      if (!confirmPassword) return showError('Confirm Password is required.');
+      if (password !== confirmPassword) return showError('Passwords do not match.');
+
+      // Disable button while "registering"
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating...';
+
+      try {
+        const session = await registerUser({ full_name: fullName, email, password });
+        localStorage.setItem('raa_session', JSON.stringify(session));
+
+        showSuccess(`Account created for <b>${session.user.full_name}</b>. Redirecting to <b>/chat</b>...`);
+
+        setTimeout(() => {
+          window.location.href = `/chat?user_id=${encodeURIComponent(session.user.id)}`;
+        }, 900);
+
+      } catch (err) {
+        showError(err?.message || 'Registration failed. Please try again.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create account';
+      }
+    });
+
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
