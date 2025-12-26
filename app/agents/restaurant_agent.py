@@ -1,5 +1,6 @@
 import json
 import re
+from uuid import uuid4
 from typing import Dict, List, Optional
 from sqlalchemy.orm import Session
 
@@ -161,13 +162,17 @@ class RestaurantAgent:
             items_json=json.dumps(priced_items),
             total_amount=total,
             status="Pending",
+            display_id=None,
         )
         self.db.add(record)
+        if not record.display_id:
+            record.display_id = f"RES-{room_number}-{uuid4().hex[:6].upper()}"
         self.db.commit()
         self.db.refresh(record)
 
         return {
             "id": record.id,
+            "display_id": record.display_id,
             "room_number": room_number,
             "items": priced_items,
             "total_amount": total,
