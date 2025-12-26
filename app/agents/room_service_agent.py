@@ -1,4 +1,5 @@
 from typing import Dict, Optional
+from uuid import uuid4
 from sqlalchemy.orm import Session
 
 from app.agents.llm_client import LLMClient
@@ -106,12 +107,16 @@ class RoomServiceAgent:
             room_number=room_number,
             request_type=request_type,
             status="Pending",
+            display_id=None,
         )
         self.db.add(record)
+        if not record.display_id:
+            record.display_id = f"ROS-{room_number}-{uuid4().hex[:6].upper()}"
         self.db.commit()
         self.db.refresh(record)
         return {
             "id": record.id,
+            "display_id": record.display_id,
             "room_number": room_number,
             "request_type": request_type,
             "status": record.status,
