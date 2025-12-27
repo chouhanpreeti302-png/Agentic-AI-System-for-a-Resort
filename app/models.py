@@ -19,6 +19,7 @@ class RestaurantOrder(Base):
     __tablename__ = "restaurant_orders"
 
     id = Column(Integer, primary_key=True, index=True)
+    display_id = Column(String, unique=True, index=True, nullable=True)
     conversation_id = Column(String, index=True)
     room_number = Column(String, index=True)
     items_json = Column(Text)
@@ -31,6 +32,7 @@ class RoomServiceRequest(Base):
     __tablename__ = "room_service_requests"
 
     id = Column(Integer, primary_key=True, index=True)
+    display_id = Column(String, unique=True, index=True, nullable=True)
     conversation_id = Column(String, index=True)
     room_number = Column(String, index=True)
     request_type = Column(String)
@@ -43,3 +45,14 @@ class Room(Base):
 
     room_number = Column(String, primary_key=True, index=True)
     available = Column(Boolean, default=True)
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(String, primary_key=True, index=True)
+    full_name = Column(String)
+    email = Column(String, unique=True, index=True)
+    password_hash = Column(String)
+    room_number = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Resort Paradise Chat</title>
+  <title>User</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -63,6 +63,48 @@
       color: #d9f4ff;
       border: 1px solid rgba(74,196,255,0.25);
       box-shadow: var(--glow);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .account {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(15, 22, 39, 0.6);
+    }
+    .account-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .account-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #f2f6ff;
+    }
+    .account-email {
+      font-size: 12px;
+      color: #9aa5ba;
+    }
+    .account-logout {
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.06);
+      color: #e8edf7;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .account-logout:hover {
+      background: rgba(255,255,255,0.12);
     }
     main {
       padding: 0 24px 32px;
@@ -148,14 +190,13 @@
       border-top: 1px solid var(--border);
       padding: 14px;
       display: grid;
-      grid-template-columns: 1fr 140px 120px;
+      grid-template-columns: 1fr 120px;
       gap: 10px;
       background: #0b1221;
       border-radius: 0 0 18px 18px;
     }
     @media (max-width: 760px) {
-      form { grid-template-columns: 1fr 1fr; }
-      .room-input { grid-column: 1 / -1; }
+      form { grid-template-columns: 1fr; }
     }
     input, button, textarea { font: inherit; }
     textarea {
@@ -173,13 +214,6 @@
       border-color: rgba(74,196,255,0.8);
       box-shadow: 0 0 0 3px rgba(74,196,255,0.18);
       transform: translateY(-1px);
-    }
-    input.room-input {
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: #0d1425;
-      color: #e8edf7;
     }
     button {
       border: none;
@@ -251,37 +285,49 @@
 </head>
 <body>
   <header>
-    <div class="brand"><span class="brand-badge">R</span> Resort Paradise</div>
-    <div class="pill">Live agent interface</div>
+    <div class="brand"><span class="brand-badge"></span> Resort Paradise</div>
+    <div class="header-actions">
+      <!-- <div class="pill">Live agent interface</div> -->
+      <div class="account" id="account-panel">
+        <div class="account-info">
+          <div class="account-name" id="account-name">Guest</div>
+          <div class="account-email" id="account-email">guest@resort.local</div>
+        </div>
+        <button class="account-logout" id="logout-btn" type="button">Logout</button>
+      </div>
+    </div>
   </header>
 
   <div class="hero">
     <div>
-      <h1 class="hero-title">Premium guest concierge</h1>
+      <h1 class="hero-title">Welcome <span id="guest-name">Guest</span></h1>
       <p class="hero-sub">Order food, schedule housekeeping, and request amenities in one natural conversation.</p>
     </div>
-    <div class="hero-badge">⚡ Instant routing · Human-grade replies</div>
+    <!-- <div class="hero-badge">⚡ Instant routing · Human-grade replies</div> -->
   </div>
 
   <main>
     <section class="card chat-card">
       <h2 class="section-title">Chat with the resort</h2>
-      <p class="subtext">Ask about food, housekeeping, or amenities. Mention your room number to place requests.</p>
+      <p class="subtext">Ask about food, housekeeping, or amenities. If you don't have a room yet, request one here.</p>
 
       <div id="messages" class="messages"></div>
 
       <form id="chat-form">
-        <textarea id="message" placeholder="Type your request (e.g., “Send two coffees and extra towels to room 101”)"></textarea>
-        <input id="room" class="room-input" placeholder="Room #" />
+        <textarea id="message" placeholder="Type your request (e.g., “Book a room” or “Send two coffees”)"></textarea>
         <button id="send-btn" type="submit">Send</button>
       </form>
     </section>
 
     <aside class="card side-card">
       <h3>Quick tips</h3>
-      <p class="muted">Mention what you need and your room. The agent routes to restaurant or room service automatically.</p>
-      <div class="order-snippet" id="last-order" style="display:none;"></div>
-      <div class="order-snippet" id="last-room" style="display:none;"></div>
+      <p class="muted">Ask to book a room first, then request food or room service.</p>
+      <h3 id="services-header" style="display:none;">Recent service updates</h3>
+      <div id="service-list"></div>
+      <h3 id="invoice-header" style="display:none;">Invoice</h3>
+      <div class="order-snippet" id="invoice-details" style="display:none;"></div>
+      <div id="invoice-list"></div>
+      <!-- <button class="btn" id="invoice-btn" type="button" style="display:none; margin-top:8px;">Pay bill</button> -->
       <h3>Menu highlights</h3>
       <div id="menu-grid" class="menu-grid"></div>
     </aside>
@@ -291,13 +337,40 @@
     const messagesEl = document.getElementById("messages");
     const form = document.getElementById("chat-form");
     const messageInput = document.getElementById("message");
-    const roomInput = document.getElementById("room");
     const sendBtn = document.getElementById("send-btn");
     const menuGrid = document.getElementById("menu-grid");
-    const lastOrder = document.getElementById("last-order");
-    const lastRoom = document.getElementById("last-room");
+    const serviceList = document.getElementById("service-list");
+    const accountNameEl = document.getElementById("account-name");
+    const accountEmailEl = document.getElementById("account-email");
+    const logoutBtn = document.getElementById("logout-btn");
+    const guestNameEl = document.getElementById("guest-name");
+    const servicesHeader = document.getElementById("services-header");
+    const invoiceHeader = document.getElementById("invoice-header");
+    const invoiceDetails = document.getElementById("invoice-details");
+    const invoiceList = document.getElementById("invoice-list");
+    const invoiceBtn = document.getElementById("invoice-btn");
+    const knownStatuses = { orders: {}, room: {} };
+    let historyInitialized = false;
 
-    const conversationId = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get("user_id");
+    const conversationId = userId
+      ? `${userId}-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`
+      : (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()));
+
+    function getSessionUser() {
+      const sessionRaw = localStorage.getItem("raa_session");
+      if (!sessionRaw) return null;
+      try {
+        const session = JSON.parse(sessionRaw);
+        return session?.user || null;
+      } catch (err) {
+        console.warn("Invalid session data", err);
+        return null;
+      }
+    }
+
+    let sessionUser = getSessionUser();
 
     function addBubble(role, text, meta = {}) {
       const bubble = document.createElement("div");
@@ -336,18 +409,9 @@
       evt.preventDefault();
       const text = messageInput.value.trim();
       if (!text) return;
-      let room = roomInput.value.trim() || null;
+      const roomNumber = sessionUser?.room_number || null;
 
-      // If room not provided explicitly, try to parse from the message (e.g., "room 104").
-      if (!room) {
-        const match = text.toLowerCase().match(/room\s*(\d{1,4})/);
-        if (match) {
-          room = match[1];
-          roomInput.value = room;
-        }
-      }
-
-      addBubble("user", text, { room });
+      addBubble("user", text, { room: roomNumber });
       messageInput.value = "";
       sendBtn.disabled = true;
 
@@ -355,13 +419,18 @@
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: text, room_number: room, conversation_id: conversationId }),
+          body: JSON.stringify({ message: text, room_number: roomNumber, conversation_id: conversationId, user_id: userId }),
         });
         if (!res.ok) throw new Error(`Server returned ${res.status}`);
         const data = await res.json();
 
-        addBubble("agent", data.reply, { department: data.department, room: room });
+        addBubble("agent", data.reply, { department: data.department, room: roomNumber });
+        syncRoomFromReply(data.reply);
         handleArtifacts(data);
+        // if (isBillingRequest(text)) {
+        //   hydrateInvoice();
+        //   addBubble("agent", "Here is your invoice summary in the sidebar. Let me know if you'd like to pay now.", { department: "receptionist" });
+        // }
       } catch (err) {
         addBubble("agent", "Sorry, I couldn't reach the service. Please try again.", { department: "system" });
         console.error(err);
@@ -372,14 +441,25 @@
     }
 
     function handleArtifacts(data) {
-      if (data.order) {
-        const items = data.order.items.map(i => `${i.quantity}x ${i.name}`).join(", ");
-        lastOrder.style.display = "block";
-        lastOrder.innerText = `Restaurant order #${data.order.id} · ${items} · Total ₹${data.order.total_amount.toFixed(2)} · ${data.order.status}`;
+      if (data.order || data.room_service_request) {
+        hydrateLastRequests();
+        hydrateInvoice();
       }
-      if (data.room_service_request) {
-        lastRoom.style.display = "block";
-        lastRoom.innerText = `Room service #${data.room_service_request.id} · ${data.room_service_request.request_type} · ${data.room_service_request.status}`;
+    }
+
+    function syncRoomFromReply(reply) {
+      const match = reply.match(/Room\s+(\d{3})/i);
+      if (!match || !sessionUser) return;
+      if (sessionUser.room_number === match[1]) return;
+      sessionUser.room_number = match[1];
+      const sessionRaw = localStorage.getItem("raa_session");
+      if (!sessionRaw) return;
+      try {
+        const session = JSON.parse(sessionRaw);
+        session.user = { ...session.user, room_number: match[1] };
+        localStorage.setItem("raa_session", JSON.stringify(session));
+      } catch (err) {
+        console.warn("Failed to update session room", err);
       }
     }
 
@@ -397,9 +477,161 @@
       }
     }
 
+    function hydrateAccount() {
+      const sessionRaw = localStorage.getItem("raa_session");
+      if (!sessionRaw) return null;
+      try {
+        const session = JSON.parse(sessionRaw);
+        if (session?.user?.full_name) {
+          accountNameEl.textContent = session.user.full_name;
+          guestNameEl.textContent = session.user.full_name;
+        }
+        if (session?.user?.email) {
+          accountEmailEl.textContent = session.user.email;
+        }
+        return session?.user || null;
+      } catch (err) {
+        console.warn("Invalid session data", err);
+        return null;
+      }
+    }
+
+    async function hydrateLastRequests() {
+      if (!userId) return;
+      try {
+        const res = await fetch(`/api/users/${encodeURIComponent(userId)}/history`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (historyInitialized) {
+          (data.restaurant_orders || []).forEach(order => {
+            const key = order.display_id || String(order.id);
+            const previous = knownStatuses.orders[key];
+            if (previous && previous !== order.status) {
+              addBubble(
+                "agent",
+                `Update: Restaurant order ${key} is now ${order.status}.`,
+                { department: "restaurant", room: data.room_number }
+              );
+            }
+            knownStatuses.orders[key] = order.status;
+          });
+          (data.room_service_requests || []).forEach(request => {
+            const key = request.display_id || String(request.id);
+            const previous = knownStatuses.room[key];
+            if (previous && previous !== request.status) {
+              addBubble(
+                "agent",
+                `Update: Room service ${key} is now ${request.status}.`,
+                { department: "room_service", room: data.room_number }
+              );
+            }
+            knownStatuses.room[key] = request.status;
+          });
+        }
+        const orderSnippets = (data.restaurant_orders || []).map(order => {
+          const items = order.items.map(i => `${i.quantity}x ${i.name}`).join(", ");
+          const orderId = order.display_id || order.id;
+          return `<div class="order-snippet">Restaurant order #${orderId} · ${items} · Total ₹${order.total_amount.toFixed(2)} · ${order.status}</div>`;
+        });
+        const roomSnippets = (data.room_service_requests || []).map(request => {
+          const requestId = request.display_id || request.id;
+          return `<div class="order-snippet">Room service #${requestId} · ${request.request_type} · ${request.status}</div>`;
+        });
+        // const totalBillables = (data.restaurant_orders || []).reduce((sum, order) => sum + (order.total_amount || 0), 0);
+        // const totalBillableSnippet = `<div class="order-snippet">Total Bill ₹${totalBillables.toFixed(2)}</div>`;
+        // const totalSnippets = totalBillables ? [totalBillableSnippet] : [];
+        const snippets = [...orderSnippets, ...roomSnippets];
+        if (snippets.length) {
+          servicesHeader.style.display = "block";
+          serviceList.innerHTML = snippets.join("");
+        } else {
+          servicesHeader.style.display = "none";
+          serviceList.innerHTML = "";
+        }
+        historyInitialized = true;
+      } catch (err) {
+        console.error("Failed to load user history", err);
+      }
+    }
+
+    function isBillingRequest(text) {
+      const lowered = text.toLowerCase();
+      return [
+        "bill",
+        "pay",
+        "invoice",
+        "total",
+        "charge",
+        "payment",
+        "checkout",
+      ].some(k => lowered.includes(k));
+    }
+
+    async function hydrateInvoice() {
+      if (!userId) return;
+      try {
+        const res = await fetch(`/api/users/${encodeURIComponent(userId)}/invoice`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.restaurant_orders || data.restaurant_orders.length === 0) {
+          invoiceHeader.style.display = "none";
+          invoiceDetails.style.display = "none";
+          invoiceBtn.style.display = "none";
+          invoiceList.innerHTML = "";
+          return;
+        }
+        // const orderRows = data.restaurant_orders.map(order => {
+        //   const orderId = order.display_id || order.id;
+        //   const items = order.items.map(i => `${i.quantity}x ${i.name}`).join(", ");
+        //   return `<div class="order-snippet">Restaurant order #${orderId} · ${items} · Total ₹${order.total_amount.toFixed(2)} · ${order.status}</div>`;
+        // });
+        invoiceHeader.style.display = "block";
+        invoiceDetails.style.display = "block";
+        invoiceDetails.innerText =
+          `Guest: ${data.user.full_name} · Email: ${data.user.email} · Room: ${data.room_number || "NA"} · Total due: ₹${Number(data.total_amount).toFixed(2)}`;
+        // invoiceList.innerHTML = orderRows.join("");
+        invoiceBtn.style.display = "inline-flex";
+      } catch (err) {
+        console.error("Failed to load invoice", err);
+      }
+    }
+
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("raa_session");
+      window.location.href = "/login";
+    });
+
+    invoiceBtn?.addEventListener("click", () => {
+      addBubble(
+        "agent",
+        "Thanks! Your payment request is noted. A staff member will assist you with the bill shortly.",
+        { department: "receptionist" }
+      );
+    });
+
     form.addEventListener("submit", sendMessage);
     loadMenu();
-    addBubble("agent", "Welcome! Ask for food, towels, laundry, or cleaning. Include your room number to place a request.", { department: "concierge" });
+    sessionUser = hydrateAccount();
+    hydrateLastRequests();
+    hydrateInvoice();
+    setInterval(() => {
+      hydrateLastRequests();
+      hydrateInvoice();
+    }, 2000);
+    const displayName = sessionUser?.full_name || "there";
+    if (sessionUser?.room_number) {
+      addBubble(
+        "agent",
+        `Welcome back, ${displayName}! You're checked into room ${sessionUser.room_number}. Ask for food, towels, laundry, or cleaning.`,
+        { department: "concierge", room: sessionUser.room_number }
+      );
+    } else {
+      addBubble(
+        "agent",
+        `Hi ${displayName}! Before we begin, please book a room by saying “book a room”.`,
+        { department: "receptionist" }
+      );
+    }
   </script>
 </body>
 </html>

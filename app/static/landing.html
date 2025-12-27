@@ -1,0 +1,1025 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Resort Paradise</title>
+  <meta name="description" content="Resort Paradise: automate guest requests with a premium, department-routed AI chat agent." />
+
+  <style>
+    :root{
+      --bg: #0b1220;
+      --panel: rgba(255,255,255,0.06);
+      --panel-2: rgba(255,255,255,0.08);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.70);
+      --faint: rgba(255,255,255,0.55);
+      --border: rgba(255,255,255,0.12);
+      --shadow: 0 18px 60px rgba(0,0,0,0.55);
+
+      --brand: #7dd3fc;        /* sky */
+      --brand-2: #34d399;      /* emerald */
+      --accent: #fbbf24;       /* amber */
+      --danger: #fb7185;       /* rose */
+
+      --radius: 18px;
+      --radius-sm: 14px;
+      --max: 1160px;
+
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+
+    *{ box-sizing:border-box; }
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      font-family: var(--font);
+      color: var(--text);
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(125,211,252,0.20), transparent 65%),
+        radial-gradient(900px 600px at 90% 20%, rgba(52,211,153,0.14), transparent 60%),
+        radial-gradient(900px 700px at 60% 90%, rgba(251,191,36,0.10), transparent 65%),
+        linear-gradient(180deg, #070b14 0%, #0b1220 40%, #0b1220 100%);
+      overflow-x:hidden;
+    }
+
+    a{ color: inherit; text-decoration:none; }
+    .container{ width: min(var(--max), calc(100% - 40px)); margin:0 auto; }
+    .sr-only{
+      position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0;
+    }
+
+    /* Top Navbar */
+    .nav{
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(14px);
+      background: rgba(10,15,28,0.55);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 14px 0;
+      gap: 16px;
+    }
+    .brand{
+      display:flex; align-items:center; gap: 10px;
+      font-weight: 700; letter-spacing: 0.2px;
+    }
+    .logo{
+      width: 36px; height: 36px;
+      border-radius: 12px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25), transparent 40%),
+        linear-gradient(135deg, rgba(125,211,252,0.85), rgba(52,211,153,0.75));
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.16);
+    }
+    .nav-links{
+      display:flex; align-items:center; gap: 18px;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .nav-links a{
+      padding: 10px 10px;
+      border-radius: 12px;
+      transition: background .2s ease, color .2s ease, transform .2s ease;
+    }
+    .nav-links a:hover{
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+    .nav-cta{
+      display:flex; align-items:center; gap: 10px;
+    }
+
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      cursor:pointer;
+      transition: transform .15s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+      gap: 8px;
+      user-select:none;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.09);
+      border-color: rgba(255,255,255,0.18);
+    }
+    .btn-primary{
+      border: 1px solid rgba(125,211,252,0.35);
+      background: linear-gradient(135deg, rgba(125,211,252,0.20), rgba(52,211,153,0.16));
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    .btn-primary:hover{
+      border-color: rgba(125,211,252,0.55);
+      background: linear-gradient(135deg, rgba(125,211,252,0.26), rgba(52,211,153,0.20));
+    }
+    .btn-ghost{
+      background: transparent;
+    }
+
+    .hamburger{
+      display:none;
+      width: 42px; height: 42px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      cursor:pointer;
+    }
+    .hamburger span{
+      display:block; height:2px; width:18px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.85);
+      border-radius: 999px;
+      position:relative;
+    }
+    .hamburger span::before,
+    .hamburger span::after{
+      content:"";
+      position:absolute; left:0;
+      width:18px; height:2px;
+      background: rgba(255,255,255,0.85);
+      border-radius: 999px;
+    }
+    .hamburger span::before{ top:-6px; }
+    .hamburger span::after{ top:6px; }
+
+    /* Mobile menu */
+    .mobile-menu{
+      display:none;
+      border-top: 1px solid var(--border);
+      padding: 12px 0 16px;
+    }
+    .mobile-menu a{
+      display:block;
+      padding: 12px 10px;
+      border-radius: 14px;
+      color: var(--muted);
+      font-weight: 650;
+    }
+    .mobile-menu a:hover{
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+    }
+    .mobile-cta{
+      display:flex;
+      gap: 10px;
+      padding-top: 10px;
+    }
+
+    /* Hero */
+    .hero{
+      padding: 56px 0 24px;
+      position: relative;
+    }
+    .hero-grid{
+      display:grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 26px;
+      align-items: center;
+    }
+    .badge{
+      display:inline-flex; align-items:center; gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .badge-dot{
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, #fff, rgba(125,211,252,0.8));
+      box-shadow: 0 0 0 4px rgba(125,211,252,0.10);
+    }
+    h1{
+      margin: 14px 0 10px;
+      font-size: clamp(34px, 4vw, 52px);
+      line-height: 1.06;
+      letter-spacing: -0.6px;
+    }
+    .sub{
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+      margin: 0 0 18px;
+      max-width: 56ch;
+    }
+    .hero-actions{ display:flex; gap: 12px; flex-wrap: wrap; }
+    .trust-strip{
+      margin-top: 18px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      border-radius: 16px;
+      padding: 12px 14px;
+      display:flex;
+      gap: 12px;
+      align-items:center;
+      justify-content: space-between;
+      color: var(--faint);
+      font-weight: 650;
+      font-size: 13px;
+    }
+    .trust-logos{
+      display:flex; gap: 10px; flex-wrap: wrap; justify-content:flex-end;
+    }
+    .logo-pill{
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+      color: rgba(255,255,255,0.62);
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .hero-card{
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .hero-card-header{
+      padding: 14px 14px 12px;
+      display:flex; align-items:center; justify-content:space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+    }
+    .mini-title{
+      font-weight: 800; letter-spacing: 0.2px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.80);
+    }
+    .pill{
+      font-size: 12px;
+      font-weight: 800;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(125,211,252,0.25);
+      background: rgba(125,211,252,0.08);
+      color: rgba(255,255,255,0.88);
+    }
+    .hero-card-body{
+      padding: 14px;
+    }
+    .mini-chat{
+      display:flex; flex-direction:column; gap: 10px;
+    }
+    .bubble{
+      max-width: 92%;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.86);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .bubble.user{
+      margin-left:auto;
+      background: rgba(125,211,252,0.10);
+      border-color: rgba(125,211,252,0.22);
+    }
+    .intent-chip{
+      display:inline-flex; align-items:center; gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(52,211,153,0.22);
+      background: rgba(52,211,153,0.10);
+      color: rgba(255,255,255,0.88);
+      font-weight: 800;
+      font-size: 12px;
+      width: fit-content;
+    }
+    .intent-chip b{ color: rgba(255,255,255,0.95); }
+    .confirm-card{
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      padding: 12px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.84);
+    }
+    .confirm-card .row{
+      display:flex; justify-content:space-between; gap: 10px; flex-wrap: wrap;
+      margin-top: 8px;
+      color: var(--muted);
+      font-weight: 650;
+      font-size: 12px;
+    }
+
+    /* Sections */
+    section{
+      padding: 42px 0;
+    }
+    .section-title{
+      font-size: 22px;
+      letter-spacing: -0.2px;
+      margin: 0 0 10px;
+    }
+    .section-sub{
+      margin:0 0 18px;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 80ch;
+    }
+
+    /* Problem -> Solution */
+    .split{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+    .card{
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      padding: 18px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+    }
+    .card h3{
+      margin:0 0 8px;
+      font-size: 16px;
+      letter-spacing: -0.2px;
+    }
+    .card p{
+      margin:0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    /* Features */
+    .grid-3{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .feature{
+      position: relative;
+      overflow:hidden;
+    }
+    .feature::before{
+      content:"";
+      position:absolute; inset:-1px;
+      background:
+        radial-gradient(500px 180px at 20% 0%, rgba(125,211,252,0.10), transparent 55%),
+        radial-gradient(500px 180px at 70% 20%, rgba(52,211,153,0.08), transparent 58%);
+      pointer-events:none;
+    }
+    .feature > *{ position: relative; }
+    .icon{
+      width: 40px; height: 40px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.05);
+      display:flex; align-items:center; justify-content:center;
+      margin-bottom: 10px;
+    }
+    .icon svg{ opacity: 0.9; }
+
+    /* How it Works - Stepper */
+    .stepper{
+      display:grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+    .step{
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      padding: 14px;
+      position: relative;
+      overflow:hidden;
+    }
+    .step-num{
+      display:inline-flex;
+      align-items:center; justify-content:center;
+      width: 30px; height: 30px;
+      border-radius: 999px;
+      font-weight: 900;
+      background: rgba(125,211,252,0.12);
+      border: 1px solid rgba(125,211,252,0.22);
+      margin-bottom: 10px;
+    }
+    .step h4{ margin:0 0 6px; font-size: 14px; }
+    .step p{ margin:0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+    /* Preview area */
+    .preview{
+      display:grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 14px;
+      align-items: stretch;
+    }
+    .mock-window{
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      min-height: 330px;
+    }
+    .mock-topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+    }
+    .dots{ display:flex; gap: 6px; }
+    .dot{ width: 10px; height: 10px; border-radius: 999px; background: rgba(255,255,255,0.18); }
+    .mock-body{ padding: 14px; }
+    .mock-columns{
+      display:grid;
+      grid-template-columns: 0.36fr 0.64fr;
+      gap: 12px;
+      height: 100%;
+    }
+    .sidebar-mock{
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+      border-radius: 16px;
+      padding: 12px;
+      display:flex; flex-direction:column; gap: 10px;
+    }
+    .line{
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.10);
+    }
+    .line.w60{ width: 60%; }
+    .line.w80{ width: 80%; }
+    .line.w40{ width: 40%; }
+    .line.w90{ width: 90%; }
+
+    .table-mock{
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+      border-radius: 16px;
+      overflow:hidden;
+    }
+    .table-row{
+      display:grid;
+      grid-template-columns: 0.35fr 0.25fr 0.22fr 0.18fr;
+      gap: 10px;
+      padding: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 12px;
+      color: rgba(255,255,255,0.70);
+      align-items:center;
+    }
+    .table-row.head{
+      font-weight: 900;
+      color: rgba(255,255,255,0.80);
+      background: rgba(255,255,255,0.02);
+    }
+    .badge-status{
+      width: fit-content;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 900;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.80);
+    }
+    .badge-pending{ border-color: rgba(251,191,36,0.25); background: rgba(251,191,36,0.10); }
+    .badge-progress{ border-color: rgba(125,211,252,0.25); background: rgba(125,211,252,0.10); }
+    .badge-done{ border-color: rgba(52,211,153,0.25); background: rgba(52,211,153,0.10); }
+
+    /* Final CTA */
+    .cta{
+      border-radius: calc(var(--radius) + 6px);
+      border: 1px solid rgba(255,255,255,0.14);
+      background:
+        radial-gradient(900px 300px at 10% 10%, rgba(125,211,252,0.16), transparent 55%),
+        radial-gradient(900px 300px at 90% 30%, rgba(52,211,153,0.12), transparent 60%),
+        rgba(255,255,255,0.05);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      display:flex; align-items:center; justify-content:space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .cta h3{ margin:0; font-size: 18px; }
+    .cta p{ margin:6px 0 0; color: var(--muted); line-height: 1.6; font-size: 14px; }
+
+    /* Footer */
+    footer{
+      padding: 26px 0 36px;
+      border-top: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.15);
+    }
+    .footer-grid{
+      display:grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 14px;
+      align-items:start;
+    }
+    .footer-links{
+      display:flex; gap: 14px; flex-wrap: wrap;
+      justify-content:flex-end;
+      color: var(--muted);
+      font-weight: 650;
+      font-size: 13px;
+    }
+    .footer-links a{
+      padding: 8px 10px;
+      border-radius: 12px;
+    }
+    .footer-links a:hover{
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+    }
+    .tiny{
+      color: rgba(255,255,255,0.55);
+      font-size: 12px;
+      line-height: 1.6;
+      margin-top: 10px;
+    }
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .hero-grid{ grid-template-columns: 1fr; }
+      .preview{ grid-template-columns: 1fr; }
+      .split{ grid-template-columns: 1fr; }
+      .grid-3{ grid-template-columns: 1fr 1fr; }
+      .stepper{ grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 760px){
+      .nav-links, .nav-cta{ display:none; }
+      .hamburger{ display:inline-flex; align-items:center; justify-content:center; }
+      .mobile-menu{ display:none; }
+      .mobile-menu.open{ display:block; }
+      .grid-3{ grid-template-columns: 1fr; }
+      .stepper{ grid-template-columns: 1fr; }
+      .footer-grid{ grid-template-columns: 1fr; }
+      .footer-links{ justify-content:flex-start; }
+      .trust-strip{ flex-direction: column; align-items:flex-start; }
+      .trust-logos{ justify-content:flex-start; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- NAVBAR -->
+  <header class="nav">
+    <div class="container">
+      <div class="nav-inner">
+        <a class="brand" href="#top" aria-label="Resort Paradise Home">
+          <div class="logo" aria-hidden="true"></div>
+          <div>
+            <div style="font-size:14px; line-height:1;">Resort Paradise</div>
+            <!-- <div style="font-size:12px; color: var(--muted); font-weight:650; margin-top:2px;">Guest ops automation</div> -->
+          </div>
+        </a>
+
+        <nav class="nav-links" aria-label="Primary">
+          <a href="#features">Features</a>
+          <a href="#how">How it Works</a>
+          <!-- <a href="#pricing" title="Placeholder section">Pricing</a> -->
+          <a href="/dashboard">Dashboard</a>
+          <!-- <a href="/login">Login</a> -->
+          <!-- <a href="/register">Register</a> -->
+        </nav>
+
+        <div class="nav-cta">
+          <a class="btn btn-ghost" href="/login">Login</a>
+          <a class="btn btn-primary" href="/register">Get Started</a>
+        </div>
+
+        <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <!-- Mobile menu -->
+      <div class="mobile-menu" id="mobileMenu" aria-label="Mobile">
+        <a href="#features">Features</a>
+        <a href="#how">How it Works</a>
+        <!-- <a href="#pricing">Pricing</a> -->
+        <a href="/dashboard">Dashboard</a>
+        <!-- <a href="/login">Login</a> -->
+        <!-- <a href="/register">Register</a> -->
+        <div class="mobile-cta">
+          <a class="btn btn-ghost" href="/login" style="width:100%;">Login</a>
+          <a class="btn btn-primary" href="/register" style="width:100%;">Get Started</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO (A) -->
+  <main id="top" class="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <div>
+          <div class="badge">
+            <span class="badge-dot" aria-hidden="true"></span>
+            Premium guest experience • Automated operations
+          </div>
+
+          <h1>Turn guest requests into completed tasks instantly.</h1>
+          <p class="sub">
+            Resort Paradise is a hospitality-focused AI chat agent that understands intent, routes requests to the right department,
+            and keeps every order and service request tracked end-to-end.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="/register">Get Started</a>
+            <a class="btn" href="/login">Login</a>
+            <!-- <a class="btn btn-ghost" href="#preview" style="border-color: rgba(255,255,255,0.10);">See Preview</a> -->
+          </div>
+
+          <!-- <div class="trust-strip" role="note" aria-label="Trusted by resorts placeholder">
+            <div>Trusted by resorts (placeholder)</div>
+            <div class="trust-logos" aria-hidden="true">
+              <span class="logo-pill">Coastal Bay</span>
+              <span class="logo-pill">Aurora Suites</span>
+              <span class="logo-pill">Palm &amp; Pine</span>
+              <span class="logo-pill">Golden Sands</span>
+            </div>
+          </div> -->
+        </div>
+
+        <!-- Hero mock chat card -->
+        <div class="hero-card" aria-label="Chat preview mock">
+          <div class="hero-card-header">
+            <div class="mini-title">Guest Chat</div>
+            <div class="pill">Intent routing</div>
+          </div>
+          <div class="hero-card-body">
+            <div class="mini-chat">
+              <div class="bubble user">Hi, can I order 2 cappuccinos and a sandwich to Room 412?</div>
+              <div class="intent-chip"><span>Detected Intent:</span> <b>Restaurant Agent</b></div>
+              <div class="bubble">
+                Absolutely. I’ve created your order and sent it to the restaurant team. Would you like it billed to the room?
+              </div>
+              <div class="confirm-card">
+                <div style="font-weight:900; margin-bottom:6px;">Request created</div>
+                <div class="row">
+                  <span>Record ID: <b style="color:rgba(255,255,255,0.92)">ORD-1048</b></span>
+                  <span>Status: <b style="color:rgba(255,255,255,0.92)">Pending</b></span>
+                </div>
+              </div>
+              <div class="bubble user">Yes, bill it to the room. Thanks.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Problem → Solution (B) -->
+  <section>
+    <div class="container">
+      <h2 class="section-title">From fragmented requests to a single, trackable system</h2>
+      <p class="section-sub">
+        <!-- Resorts handle requests across reception, restaurant, and room service, often through phone calls, WhatsApp, or manual logs. -->
+        <!-- That increases response time, creates missed requests, and reduces guest satisfaction. -->
+      </p>
+
+      <div class="split">
+        <div class="card">
+          <h3>Problem</h3>
+          <p>
+            Guest requests are scattered across channels and departments, making it difficult to prioritize, route, and close the loop
+            with clear status updates.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Solution</h3>
+          <p>
+            A single AI chat interface that understands intent, routes to the correct department agent, triggers tools/APIs,
+            and stores every request with status tracking and dashboard visibility.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Features (C) -->
+  <section id="features">
+    <div class="container">
+      <h2 class="section-title">Key features designed for resort operations</h2>
+      <p class="section-sub">
+        Premium, minimal UI for guests, structured workflows for staff.
+      </p>
+
+      <div class="grid-3">
+        <div class="card feature">
+          <div class="icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M4 6h16v10a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V6Z" stroke="white" opacity="0.9"/>
+              <path d="M7 10h10M7 13h7" stroke="white" opacity="0.7" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Single guest chat interface</h3>
+          <p>One place for guests to request anything, no switching channels or contacting multiple desks.</p>
+        </div>
+
+        <div class="card feature">
+          <div class="icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M12 3v6l4 2" stroke="white" opacity="0.8" stroke-linecap="round"/>
+              <path d="M21 12a9 9 0 1 1-9-9" stroke="white" opacity="0.9"/>
+            </svg>
+          </div>
+          <h3>Intent understanding and routing</h3>
+          <p>Detects guest intent and routes to reception, restaurant, or room service automatically.</p>
+        </div>
+
+        <div class="card feature">
+          <div class="icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M7 7h10v10H7V7Z" stroke="white" opacity="0.9"/>
+              <path d="M5 5h14" stroke="white" opacity="0.6" stroke-linecap="round"/>
+              <path d="M5 19h14" stroke="white" opacity="0.6" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Reception Agent</h3>
+          <p>FAQs, check-in/out, facilities, room availability, consistent answers, faster handling.</p>
+        </div>
+
+        <div class="card feature">
+          <div class="icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M4 8h16l-1 12H5L4 8Z" stroke="white" opacity="0.9"/>
+              <path d="M8 8a4 4 0 0 1 8 0" stroke="white" opacity="0.6"/>
+            </svg>
+          </div>
+          <h3>Restaurant Agent</h3>
+          <p>Menu, ordering, billing, and order tracking, convert chat into structured orders.</p>
+        </div>
+
+        <div class="card feature">
+          <div class="icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M6 4h12v16H6V4Z" stroke="white" opacity="0.9"/>
+              <path d="M9 8h6M9 12h6M9 16h4" stroke="white" opacity="0.6" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Room Service Agent</h3>
+          <p>Cleaning, laundry, amenities, creates trackable requests with status updates.</p>
+        </div>
+
+        <div class="card feature">
+          <div class="icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M4 12h6l2-3 3 6 2-3h5" stroke="white" opacity="0.85" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M4 18h16" stroke="white" opacity="0.45" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Persistent storage and dashboard visibility</h3>
+          <p>Requests and orders are stored with statuses, enabling staff visibility and operational metrics.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it Works (D) -->
+  <section id="how">
+    <div class="container">
+      <h2 class="section-title">How it works</h2>
+      <!-- <p class="section-sub">
+        A clear flow from guest message → detected intent → department routing → tool/API action → stored record → status updates.
+      </p> -->
+
+      <div class="stepper" aria-label="How it works stepper timeline">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h4>Guest chats</h4>
+          <p>Guests ask naturally: food, cleaning, check-in/out, amenities, and more.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h4>AI detects intent</h4>
+          <p>Understands request type and extracts the details needed for fulfillment.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h4>Routed to department agent</h4>
+          <p>Reception, restaurant, or room service workflows are triggered automatically.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <h4>Tool/API invoked</h4>
+          <p>Creates an order/request, updates billing, checks availability, etc. (via APIs).</p>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <h4>Stored and status updated</h4>
+          <p>Every record is stored and tracked so staff and guests get consistent updates.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screenshots / Preview (E) -->
+  <section id="preview">
+    <div class="container">
+      <h2 class="section-title">Product preview</h2>
+      <!-- <p class="section-sub">
+        Simple UI mocks for the guest chat and operations dashboard. These are placeholders you can later replace with real screenshots.
+      </p> -->
+
+      <div class="preview">
+        <!-- Chat mock window -->
+        <div class="mock-window">
+          <div class="mock-topbar">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div class="dots" aria-hidden="true">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+              </div>
+              <div style="font-weight:900; font-size:13px; color: rgba(255,255,255,0.82);">Guest Chat</div>
+            </div>
+            <!-- <div class="pill">Live preview mock</div> -->
+          </div>
+          <div class="mock-body">
+            <div class="mock-columns">
+              <div class="sidebar-mock" aria-hidden="true">
+                <div class="line w80"></div>
+                <div class="line w60"></div>
+                <div style="height:6px;"></div>
+                <div class="line w90"></div>
+                <div class="line w80"></div>
+                <div class="line w60"></div>
+                <div style="height:6px;"></div>
+                <div class="line w80"></div>
+                <div class="line w40"></div>
+                <div class="line w60"></div>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <div class="bubble user">Can I get fresh towels for Room 209?</div>
+                <div class="intent-chip"><span>Detected Intent:</span> <b>Room Service Agent</b></div>
+                <div class="bubble">Done. I’ve created a room service request. Estimated arrival: 5-8 minutes.</div>
+                <div class="confirm-card">
+                  <div style="font-weight:900;">Request created</div>
+                  <div class="row">
+                    <span>Record ID: <b style="color:rgba(255,255,255,0.92)">RS-7741</b></span>
+                    <span>Status: <b style="color:rgba(255,255,255,0.92)">In Progress</b></span>
+                  </div>
+                </div>
+                <div class="bubble user">Thank you.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard mock window -->
+        <div class="mock-window">
+          <div class="mock-topbar">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div class="dots" aria-hidden="true">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+              </div>
+              <div style="font-weight:900; font-size:13px; color: rgba(255,255,255,0.82);">Operations Dashboard</div>
+            </div>
+            <!-- <div class="pill">Orders & requests</div> -->
+          </div>
+          <div class="mock-body">
+            <div class="table-mock" aria-hidden="true">
+              <div class="table-row head">
+                <div>ID</div><div>Room</div><div>Status</div><div>Time</div>
+              </div>
+              <div class="table-row">
+                <div>ORD-1048</div><div>412</div>
+                <div><span class="badge-status badge-pending">Pending</span></div>
+                <div>18:12</div>
+              </div>
+              <div class="table-row">
+                <div>RS-7741</div><div>209</div>
+                <div><span class="badge-status badge-progress">In Progress</span></div>
+                <div>18:05</div>
+              </div>
+              <div class="table-row" style="border-bottom:none;">
+                <div>ORD-1039</div><div>118</div>
+                <div><span class="badge-status badge-done">Completed</span></div>
+                <div>17:44</div>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top: 12px; flex-wrap: wrap;">
+              <span class="logo-pill">Search</span>
+              <span class="logo-pill">Status filter </span>
+              <span class="logo-pill">Date filter </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing placeholder (optional anchor target) -->
+  <!-- <section id="pricing">
+    <div class="container">
+      <h2 class="section-title">Pricing</h2>
+      <p class="section-sub">
+        Placeholder section. You can later define plans based on room count, departments enabled, and request volume.
+      </p>
+
+      <div class="split">
+        <div class="card">
+          <h3>Starter (placeholder)</h3>
+          <p>For small boutique resorts: guest chat + reception workflows + basic tracking.</p>
+        </div>
+        <div class="card">
+          <h3>Operations (placeholder)</h3>
+          <p>For full operations: restaurant + room service + dashboards + integrations.</p>
+        </div>
+      </div>
+    </div>
+  </section> -->
+
+  <!-- Final CTA Banner (F) -->
+  <section>
+    <div class="container">
+      <div class="cta">
+        <div>
+          <h3>Start automating your resort operations</h3>
+          <p>Move from ad-hoc messaging to structured, trackable guest operations, without sacrificing a premium experience.</p>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <a class="btn btn-primary" href="/register">Get Started</a>
+          <a class="btn" href="/login">Login</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer (G) -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="brand" style="gap:10px;">
+            <div class="logo" aria-hidden="true"></div>
+            <div>
+              <div style="font-weight:800;">Resort Paradise</div>
+              <div style="color: var(--muted); font-size: 13px; margin-top:4px;">AI-powered guest operations for modern hospitality.</div>
+            </div>
+          </div>
+          <div class="tiny">
+            © <span id="year"></span> Resort Paradise. All rights reserved. <br/>
+            <!-- This landing page is a frontend-only mock suitable for prototyping and stakeholder demos. -->
+          </div>
+        </div>
+
+        <div class="footer-links" aria-label="Footer links">
+          <a href="#top">About</a>
+          <a href="#top">Contact</a>
+          <a href="#top">Terms</a>
+          <a href="#top">Privacy</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    hamburger?.addEventListener('click', () => {
+      const isOpen = mobileMenu.classList.toggle('open');
+      hamburger.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    // Close mobile menu when clicking a link (in-page anchors)
+    mobileMenu?.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', () => {
+        mobileMenu.classList.remove('open');
+        hamburger?.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const href = a.getAttribute('href');
+        if (!href || href === '#') return;
+        const target = document.querySelector(href);
+        if (!target) return;
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
